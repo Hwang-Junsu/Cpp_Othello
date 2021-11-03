@@ -7,11 +7,15 @@ using namespace std;
 
 struct Logic {
     int** dat;
+    int player = 0;
 
     void input_pos();
     void create_board();
     void delete_board();
     void init_board();
+    void reverse_stone();
+    bool put_stone(int, int);
+    bool check();
     bool game_over();
 };
 
@@ -38,11 +42,31 @@ void Logic::input_pos() {
     cin >> x_pos >> y_pos;
     x_pos -= '0';
     y_pos -= '0';
-    dat[x_pos][y_pos] = 1;
+    if (((x_pos <= 7 && x_pos >= 0) || (y_pos >= 0 && y_pos <= 7)) && put_stone(x_pos,y_pos) == 1) {
+        dat[x_pos][y_pos] = player + 1;
+        player = 1 - player;
+    }
 }
+
+void Logic::reverse_stone() {
+
+}
+
+bool Logic::put_stone(int x,int y) {
+    if (dat[x][y] > 0) return false;
+
+
+
+
+    else return true;
+}
+
+bool Logic::check() {
+    return true;
+}
+
 bool Logic::game_over() {
     return true;
-    
 }
 
 struct Render {
@@ -50,7 +74,6 @@ struct Render {
 
     void setdata(int**);
     void board_print();
-    void stone_print();
     void topindex();
 };
 
@@ -88,9 +111,6 @@ void Render::board_print() {
     }
 }
 
-void Render::stone_print() {
-
-}
 
 void Render::topindex() {
     cout << "   0   1   2   3   4   5   6   7" << endl;
@@ -108,10 +128,12 @@ int main()
     Render rd;
     rd.setdata(lg.dat);
     lg.init_board();
-    int cnt = 5;
 
     while (lg.game_over()) {
         rd.board_print();
+
+
+        cout << "Input Position : ";
         lg.input_pos();
     }
    
