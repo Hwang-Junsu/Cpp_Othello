@@ -1,5 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <iostream>
+﻿#include <iostream>
 #include <cstdlib>
 #define SIZE 8
 using namespace std;
@@ -8,14 +7,15 @@ using namespace std;
 struct Logic {
     int** dat;
     int player = 0;
-    int dir = 0; // 1 = 우 2 = 좌 3 = 하 4 = 상
-    int count = 0;
+    int dx[8] = { -1, 1, 0, 0, -1, 1, 1, -1}; // 0.상  1.하  2.좌  3.우  4.우상  5.우하  6.좌하  7.좌상
+    int dy[8] = { 0, 0, -1, 1, 1, 1, -1 ,-1};
 
     void input_pos();
     void create_board();
     void delete_board();
     void init_board();
-    void reverse_stone(int, int, int);
+    void reverse_stone(int, int);
+    bool surround_stone(int, int);
     bool put_stone(int, int);
     bool check(int, int);
     bool game_over();
@@ -26,7 +26,7 @@ void Logic::create_board() {
     dat[0] = new int[SIZE * SIZE];
     for (int i = 1; i < SIZE; i++) dat[i] = dat[i - 1] + SIZE;
 
-    memset(dat[0], 0, sizeof(int) * SIZE* SIZE);
+    memset(dat[0], 0, sizeof(int) * SIZE * SIZE);
 }
 void Logic::delete_board() {
     delete[] dat[0];
@@ -46,85 +46,47 @@ void Logic::input_pos() {
     y_pos -= '0';
     if ((x_pos <= 7 && x_pos >= 0) && (y_pos >= 0 && y_pos <= 7)) {
         if (put_stone(x_pos, y_pos) == 1) {
-        dat[x_pos][y_pos] = player + 1;
-        reverse_stone(x_pos,y_pos,dir);
-        player = 1 - player;
-    }
-    }
-}
-
-void Logic::reverse_stone(int x,int y,int dir) {
-    int tmp = 0;
-    if (dir == 1 && player == 0) { //백, 우
-        while (dat[x][y] != 2) {
-            dat[x][y+tmp] = 1;
-            tmp++;
-        }
-    }
-    else if (dir == 2 && player == 0) { //백, 좌
-        while (dat[x][y] != 2) {
-            dat[x][y - tmp] = 1;
-            tmp++;
+            dat[x_pos][y_pos] = player + 1;
+            reverse_stone(x_pos, y_pos);
+            player = 1 - player;
         }
     }
 }
 
-bool Logic::put_stone(int x,int y) {
+void Logic::reverse_stone(int x, int y) {
+    
+}
+
+bool Logic::put_stone(int x, int y) {
     if (dat[x][y] > 0) return false;
-    if (check(x, y)==1) return true;
-
-
-
-
+    if (check(x, y) == 1) return true;
     return false;
 }
 
 bool Logic::check(int x, int y) {
-     //좌표가 들어왔을 때 1.상하 2. 좌우 3. 대각선으로 검사하여 반대돌이 있고 그 뒤에 자신의 돌이 있으면 true;
-    //1. 좌우
-    if (player == 0) {//백일때
-        for (int i = y; i < SIZE - 1; i++) { // 오른쪽 검사
-            if (dat[x][y + 1] == 2 && dat[x][i + 1] == 1) {
-                dir = 1; return true;
+    if (player == 0) {
+        for (int i = 0; i < 8; i++) {
+            if ((x + dx[i] < 0 || x + dx[i] > SIZE-1) || (y + dy[i] < 0 || y + dy[i] > SIZE-1)) break;
+            if (dat[x + dx[i]][y + dy[i]] == 2) {
+                if (surround_stone(x, y) == 1) return true;
+                else break;
+                }
             }
         }
-        for (int i = y; i > 1; i--) { // 좌측 검사
-            if (dat[x][y - 1] == 2 && dat[x][i - 1] == 1) {
-                dir = 2; return true;
+    else if (player == 1) {
+        for (int i = 0; i < 8; i++) {
+            if ((x + dx[i] < 0 || x + dx[i] > SIZE-1) || (y + dy[i] < 0 || y + dy[i] > SIZE-1)) break;
+            if (dat[x + dx[i]][y + dy[i]] == 1) {
+                if (surround_stone(x, y) == 1) return true;
+                else break;
             }
-        }
-        for (int i = x; i < SIZE - 1; i++) { // 아래쪽 검사
-            if (dat[x + 1][y] == 2 && dat[i + 1][y] == 1) {
-                dir = 3; return true;
-            }
-        }
-        for (int i = x; i > 1; i--) { // 위쪽 검사
-            if (dat[x - 1][y] == 2 && dat[i - 1][y] == 1) {
-                dir = 4; return true;
-            }
-        }
-        //대각선검사..
-        for (int i = y, j = 0; i < SIZE - 1; i++,j++) {
-            if (dat[x + 1][y + 1] == 2 && dat[x+j][i + 1] == 1) return true;
-        }
-    }
-    else if (player == 1) {//흑일때
-        for (int i = y; i < SIZE - 1; i++) { // 오른쪽 검사
-            if (dat[x][y + 1] == 1 && dat[x][i + 1] == 2) return true;
-        }
-        for (int i = y; i > 1; i--) { // 좌측 검사
-            if (dat[x][y - 1] == 1 && dat[x][i - 1] == 2) return true;
-        }
-        for (int i = x; i < SIZE - 1; i++) { // 아래쪽 검사
-            if (dat[x + 1][y] == 1 && dat[i + 1][y] == 2) return true;
-        }
-        for (int i = x; i > 1; i--) { // 위쪽 검사
-            if (dat[x - 1][y] == 1 && dat[i - 1][y] == 2) return true;
         }
     }
     return false;
+}
 
-
+bool Logic::surround_stone(int x, int y) {
+    return true;
 }
 
 bool Logic::game_over() {
@@ -199,6 +161,6 @@ int main()
         cout << "Input Position : ";
         lg.input_pos();
     }
-   
+
     lg.delete_board();
 }
