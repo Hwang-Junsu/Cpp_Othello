@@ -15,7 +15,6 @@ struct Logic {
     void delete_board();
     void init_board();
     void reverse_stone(int, int);
-    bool surround_stone(int, int);
     bool put_stone(int, int);
     bool check(int, int);
     bool game_over();
@@ -47,14 +46,14 @@ void Logic::input_pos() {
     if ((x_pos <= 7 && x_pos >= 0) && (y_pos >= 0 && y_pos <= 7)) {
         if (put_stone(x_pos, y_pos) == 1) {
             dat[x_pos][y_pos] = player + 1;
-            reverse_stone(x_pos, y_pos);
             player = 1 - player;
         }
     }
 }
 
 void Logic::reverse_stone(int x, int y) {
-    
+    if (dat[x][y] == 1) dat[x][y] = 2;
+    else if (dat[x][y] == 2) dat[x][y] = 1;
 }
 
 bool Logic::put_stone(int x, int y) {
@@ -64,30 +63,47 @@ bool Logic::put_stone(int x, int y) {
 }
 
 bool Logic::check(int x, int y) {
+    int nx = 0, ny = 0;
+    int check = 0; // 다음돌이 다른색인가 ?
     if (player == 0) {
-        for (int i = 0; i < 8; i++) {
-            if ((x + dx[i] < 0 || x + dx[i] > SIZE-1) || (y + dy[i] < 0 || y + dy[i] > SIZE-1)) break;
-            if (dat[x + dx[i]][y + dy[i]] == 2) {
-                if (surround_stone(x, y) == 1) return true;
-                else break;
+        for (int i = 0; i < 8; i++) { //i는 dir변수 조작
+            for (int j = 1; j < 7; j++) { // j는 좌표 조작
+                nx = x + (dx[i]*j); ny = y + (dy[i]*j);
+                if (nx < 0 || nx >= SIZE || ny < 0 || nx >= SIZE) break;
+
+                if (j == 1 && dat[nx][ny] == 2) check = 1; //다음돌은 다른색인가?
+                if (check == 1 && dat[nx][ny] == 0) break;
+                if (check == 1 && dat[nx][ny] == 1) {
+                    while (dat[x + dx[i] ][y+dy[i]] != 1) {
+                        nx -= dx[i]; ny -= dy[i];
+                        reverse_stone(nx, ny);
+                    }
                 }
             }
         }
+    if(check == 1) return true;
+    }
     else if (player == 1) {
-        for (int i = 0; i < 8; i++) {
-            if ((x + dx[i] < 0 || x + dx[i] > SIZE-1) || (y + dy[i] < 0 || y + dy[i] > SIZE-1)) break;
-            if (dat[x + dx[i]][y + dy[i]] == 1) {
-                if (surround_stone(x, y) == 1) return true;
-                else break;
+        for (int i = 0; i < 8; i++) { //i는 dir변수 조작
+            for (int j = 1; j < 7; j++) { // j는 좌표 조작
+                nx = x + (dx[i] * j); ny = y + (dy[i] * j);
+                if (nx < 0 || nx >= SIZE || ny < 0 || nx >= SIZE) break;
+
+                if (j == 1 && dat[nx][ny] == 1) check = 1;
+                if (check == 1 && dat[nx][ny] == 0) break;
+                if (check == 1 && dat[nx][ny] == 2) {
+                    while (dat[x+dx[i]][y+dy[i]] != 2) {
+                        nx -= dx[i]; ny -= dy[i];
+                        reverse_stone(nx, ny);
+                    }
+                }
             }
         }
+    if (check == 1) return true;
     }
     return false;
 }
 
-bool Logic::surround_stone(int x, int y) {
-    return true;
-}
 
 bool Logic::game_over() {
     return true;
