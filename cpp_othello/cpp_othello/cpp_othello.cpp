@@ -52,20 +52,19 @@ void Logic::input_pos() {
         }
     }
 }
-
 void Logic::reverse_stone(int x, int y) {
         if (dat[x][y] == 1) dat[x][y] = 2;
         else if (dat[x][y] == 2) dat[x][y] = 1;
 
         count++;
 }
-
 bool Logic::put_stone(int x, int y) {
-    if (dat[x][y] > 0) return false;
+    if (dat[x][y] > 0) {
+        return false;
+    }
     if (check(x, y) == 1) return true;
     return false;
 }
-
 bool Logic::check(int x, int y) {
     int nx = 0, ny = 0;
     int check = 0; // 다음돌이 다른색인가 ?
@@ -107,9 +106,23 @@ bool Logic::check(int x, int y) {
     }
     return false;
 }
-
-
 bool Logic::game_over() {
+    int cnt = 0;
+    int w_cnt = 0, b_cnt = 0;
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (dat[i][j] == 0) cnt++;
+            if (dat[i][j] == 1) w_cnt++;
+            if (dat[i][j] == 2) b_cnt++;
+        }
+    }
+
+    if (cnt == 0) {
+        if (w_cnt > b_cnt) cout << "(백) " << w_cnt << " : (흑) " << b_cnt << endl << "백이 이겼습니다.";
+        else if (b_cnt > w_cnt) cout << "(백) " << w_cnt << " : (흑) " << b_cnt << endl << "흑이 이겼습니다.";
+        else cout << "(백) " << w_cnt << " : (흑) " << b_cnt << endl << "무승부 입니다.";
+        return false;
+    }
     return true;
 }
 
@@ -120,7 +133,6 @@ struct Render {
     void board_print();
     void topindex();
 };
-
 
 void Render::board_print() {
     system("cls");
@@ -154,12 +166,9 @@ void Render::board_print() {
         else cout << "├─┼─┼─┼─┼─┼─┼─┼─┤" << endl;
     }
 }
-
-
 void Render::topindex() {
     cout << "   0   1   2   3   4   5   6   7" << endl;
 }
-
 void Render::setdata(int** ptr) {
     dat = ptr;
 }
@@ -173,14 +182,15 @@ int main()
     rd.setdata(lg.dat);
     lg.init_board();
 
-    while (lg.game_over()) {
+    do {
         rd.board_print();
 
         if (lg.player == 0) cout << "백 차례입니다." << endl;
         else cout << "흑 차례입니다." << endl;
         cout << "Input Position : ";
         lg.input_pos();
-    }
+    } while (lg.game_over());
+
 
     lg.delete_board();
 }
