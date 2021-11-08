@@ -72,7 +72,7 @@ bool Logic::check(int x, int y) {
         for (int i = 0; i < 8; i++) { //i는 dir변수 조작
             for (int j = 1; j < 7; j++) { // j는 좌표 조작
                 nx = x + (dx[i] * j); ny = y + (dy[i] * j);
-                if (nx < 0 || nx >= SIZE || ny < 0 || nx >= SIZE) break;
+                if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) break;
 
                 if (j == 1 && dat[nx][ny] == 2) check = 1; //다음돌은 다른색인가?
                 if (check == 1 && dat[nx][ny] == 0) break;
@@ -90,7 +90,7 @@ bool Logic::check(int x, int y) {
         for (int i = 0; i < 8; i++) { //i는 dir변수 조작
             for (int j = 1; j < 7; j++) { // j는 좌표 조작
                 nx = x + (dx[i] * j); ny = y + (dy[i] * j);
-                if (nx < 0 || nx >= SIZE || ny < 0 || nx >= SIZE) break;
+                if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) break;
 
                 if (j == 1 && dat[nx][ny] == 1) check = 1;
                 if (check == 1 && dat[nx][ny] == 0) break;
